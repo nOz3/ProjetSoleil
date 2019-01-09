@@ -12,8 +12,8 @@ import cv2
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
-ap.add_argument("-v", "--video", type=str,
-	help="path to input video file")
+ap.add_argument("-d", "--dataset", type=str,
+	help="path to the dataset")
 ap.add_argument("-t", "--tracker", type=str, default="kcf",
 	help="OpenCV object tracker type")
 args = vars(ap.parse_args())
@@ -51,13 +51,25 @@ initBB = None
 
 # if a video path was not supplied, grab the reference to the web cam
 if not args.get("video", False):
-	print("[INFO] starting video stream...")
-	vs = VideoStream(src=0).start()
-	time.sleep(1.0)
+	arg_data = ("./dataset/")
 
 # otherwise, grab a reference to the video file
 else:
-	vs = cv2.VideoCapture(args["video"])
+	arg_data = args["dataset"]
+
+img=[]
+for i in range(0,36):
+    img.append(cv2.imread(arg_data+str(i)+'.png'))
+
+height,width,layers=img[0].shape
+
+video=cv2.VideoWriter('video.avi',-1,1,(width,height))
+
+for j in range(0,36):
+    video.write(img[j])
+
+cv2.destroyAllWindows()
+video.release()
 
 # initialize the FPS throughput estimator
 fps = None
