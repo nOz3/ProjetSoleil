@@ -24,10 +24,20 @@ OPENCV_OBJECT_TRACKERS = {
 }
 
 
-trackers = cv2.MultiTracker_create()
-
+trackers = []
+cpt_frame = 0
 
 vs = cv2.VideoCapture(args["video"])
+
+
+def verif_fus(point1, point2, tracker):
+	global cpt_frame, trackers
+	if point2 != None:
+		if abs(point1[0] - point2[0]) < 50 and abs(point1[1] - point2[1]) < 50:
+			cpt_frame += 1
+			if cpt_frame >= 10:
+				trackers.remove(tracker)
+				cpt_frame = 0
 
 
 while True:
@@ -40,12 +50,16 @@ while True:
 
 	frame = imutils.resize(frame, width=600)
 
+	old_point = None
 
-	(success, boxes) = trackers.update(frame)
-	
-	for box in boxes:
-		(x, y, w, h) = [int(v) for v in box]
-		cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+	for tracker in trackers:
+		(success, boxe) = tracker.update(frame)
+		if success:
+			(x, y, w, h) = [int(v) for v in boxe]
+			point = [x+(w//2), y+(h//2)]
+			verif_fus(point, old_point, tracker)
+			cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+			old_point = point
 
 	cv2.imshow("Frame", frame)
 	key = cv2.waitKey(1) & 0xFF
@@ -54,7 +68,8 @@ while True:
 		box = cv2.selectROI("Frame", frame, fromCenter=False, showCrosshair=True)
 
 		tracker = OPENCV_OBJECT_TRACKERS[args["tracker"]]()
-		trackers.add(tracker, frame, box) 	
+		tracker.init(frame, box)
+		trackers.append(tracker)
 	elif key == ord("q"):
 		break
 
@@ -65,10 +80,3 @@ else:
 	vs.release()
 
 cv2.destroyAllWindows()
-
-
-
-
-
-
-
