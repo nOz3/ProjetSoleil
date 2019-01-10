@@ -9,6 +9,8 @@ import argparse
 import imutils
 import time
 import cv2
+import os
+import sys
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -58,28 +60,37 @@ else:
 	arg_data = args["dataset"]
 
 img=[]
-for i in range(0,36):
-    img.append(cv2.imread(arg_data+str(i)+'.png'))
+for i in range(1,36):
 
-height,width,layers=img[0].shape
+    img.append(cv2.imread("/home/enzo/ProjetSoleil/dataset/" + str(i) + ".png"))
 
-video=cv2.VideoWriter('video.avi',-1,1,(width,height))
+imgref = cv2.imread('/home/enzo/ProjetSoleil/dataset/1.png')
+height = imgref.shape[0]
+width = imgref.shape[1]
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+vs=cv2.VideoWriter('video.avi',fourcc,20.0,(width,height))
 
-for j in range(0,36):
-    video.write(img[j])
+for j in range(0,35):
+    vs.write(img[j])
 
-cv2.destroyAllWindows()
-video.release()
+#cv2.destroyAllWindows()
+vs.release()
 
 # initialize the FPS throughput estimator
 fps = None
+vs2 = cv2.VideoCapture('video.avi')
+print(vs2)
+
 
 # loop over frames from the video stream
 while True:
 	# grab the current frame, then handle if we are using a
 	# VideoStream or VideoCapture object
-	frame = vs.read()
-	frame = frame[1] if args.get("video", False) else frame
+
+	frame = vs2.read()
+	print("---------------------------------")
+	print(frame)
+	#frame = frame[1] if args.get("video", False) else frame
 
 	# check to see if we have reached the end of the stream
 	if frame is None:
@@ -88,6 +99,7 @@ while True:
 	# resize the frame (so we can process it faster) and grab the
 	# frame dimensions
 	frame = imutils.resize(frame, width=500)
+
 	(H, W) = frame.shape[:2]
 
 	# check to see if we are currently tracking an object
