@@ -38,6 +38,8 @@ def verif_fus(point1, point2, tracker):
 			if cpt_frame >= 10:
 				trackers.remove(tracker)
 				cpt_frame = 0
+		else:
+			cpt_frame = 0
 
 
 while True:
@@ -57,8 +59,10 @@ while True:
 		if success:
 			(x, y, w, h) = [int(v) for v in boxe]
 			point = [x+(w//2), y+(h//2)]
-			verif_fus(point, old_point, tracker)
 			cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+			cv2.putText(frame, "Personne "+str(trackers.index(tracker)) , (x, y-2), cv2.FONT_HERSHEY_SIMPLEX,
+						0.3, (0,255,0), 1, cv2.LINE_AA)
+			verif_fus(point, old_point, tracker)
 			old_point = point
 
 	cv2.imshow("Frame", frame)
